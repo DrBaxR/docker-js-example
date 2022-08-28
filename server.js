@@ -4,16 +4,6 @@ const app = express()
 const mongoose = require('mongoose');
 const port = 3000
 
-mongoose.connect(
-  'mongodb://localhost:27017',
-  {
-    dbName: 'header',
-    authSource: 'admin',
-    user: "test",
-    pass: "test",
-  }
-);
-
 const HeaderSchema = new mongoose.Schema({
   headerid: Number,
   text: String,
@@ -24,9 +14,20 @@ const HeaderModel = mongoose.model('Header', HeaderSchema); // collection called
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.get('/header', (req, res) => {
-  HeaderModel.find({ headerid: 1 }, (err, headers) => {
-    res.send(headers[0]);
-  })
+  mongoose.connect( //don't do this in an actual application
+    'mongodb://mongodb', // the name of the database container if used in container form
+    {
+      dbName: 'header',
+      authSource: 'admin',
+      user: "test",
+      pass: "test",
+    }
+  ).then(conn => {
+    HeaderModel.find({ headerid: 1 }, (err, headers) => {
+      mongoose.disconnect();
+      res.send(headers[0]);
+    })
+  });
 })
 
 app.listen(port, () => {
